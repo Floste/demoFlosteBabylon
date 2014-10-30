@@ -3,8 +3,10 @@
 <head>
     <title>Babylon.js</title>
     <link href="index.css" rel="stylesheet" />
+    <script src="/socket.io/socket.io.js"></script>
     <script src="hand.minified-1.1.1.js"></script>
-    <script src="BabylonJS/babylon.1.14.js"></script>
+    <script src="babylon.1.14.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 </head>
 <body>
     <div id="rootDiv">
@@ -86,6 +88,39 @@
                 });
 
         }
+
+        var socket = io.connect(window.location.origin);
+        socket.emit('identification', 'viewer');
+        socket.on('orientation', function(message) {
+            console.log(message.alphaOrientation + " | " + message.betaOrientation);
+            stepAlpha = 0;
+            if(message.alphaOrientation != 0){
+                stepAlpha = 0.8
+                if(message.alphaOrientation>5 || message.alphaOrientation < -5){
+                    stepAlpha = 1.5;
+                }       
+                if(message.alphaOrientation<0){
+                    stepAlpha = stepAlpha * -1;
+                }
+            }
+            newBeta = camera.beta;
+            if(message.betaOrientation != 0){
+                stepBeta = 0.2
+                if(message.betaOrientation>5 || message.betaOrientation < -5){
+                    stepBeta = 0.4;
+                }       
+                if(message.betaOrientation<0){
+                    stepBeta = stepBeta * -1;
+                }
+                newBeta = camera.beta + stepBeta;
+                if(newBeta<0.5){ newBeta = 0.5;}
+                if(newBeta>1.7){ newBeta = 1.7;}
+            }
+            ArcAnimation(
+                    camera.alpha + (stepAlpha), 
+                    newBeta, 
+                    camera.radius);
+        });
     }, function (progress) {
         // To do: give progress feedback to user
     });
