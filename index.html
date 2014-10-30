@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Babylon.js</title>
+    <link href="index.css" rel="stylesheet" />
+    <script src="hand.minified-1.1.1.js"></script>
+    <script src="BabylonJS/babylon.1.14.js"></script>
+</head>
+<body>
+    <div id="rootDiv">
+        <canvas id="renderCanvas"></canvas>
+    </div>
+</body>
+<script type="text/javascript">
+    var canvas = document.getElementById("renderCanvas");
+    var engine = new BABYLON.Engine(canvas,true);
+    var camera;
+    var ArcAnimation;
+
+    BABYLON.SceneLoader.Load("", "america_2.6.babylon", engine, function (scene) {
+        // Wait for textures and shaders to be ready
+        scene.executeWhenReady(function () {
+            // Attach camera to canvas inputs
+            camera = new BABYLON.ArcRotateCamera("ArcRotateCam", 1, 0.8, 50, new BABYLON.Vector3(0, 10, 0), scene);
+//            camera = new BABYLON.FreeCamera("FreeCam", new BABYLON.Vector3(1, 0.8, 10), scene);
+//            camera.target = new BABYLON.Vector3(0, 0, 5);
+//            camera.lockedtarget = new BABYLON.Vector3(0, 0,10);
+            scene.activeCamera = camera;
+            scene.activeCamera.attachControl(canvas);
+
+//            console.log(scene);
+
+            // Once the scene is loaded, just register a render loop to render it
+            engine.runRenderLoop(function() {
+                scene.render();
+            });
+        });
+
+        ArcAnimation = function (toAlpha, toBeta, toRadius) {
+            var animCamAlpha = new BABYLON.Animation("animCam", "alpha", 30,
+                                      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+                                      BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
+
+            var keysAlpha = [];
+            keysAlpha.push({
+                frame: 0,
+                value: camera.alpha
+            });
+            keysAlpha.push({
+                frame: 100,
+                value: toAlpha
+            });
+            var animCamBeta = new BABYLON.Animation("animCam", "beta", 30,
+                                     BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+                                     BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
+
+            var keysBeta = [];
+            keysBeta.push({
+                frame: 0,
+                value: camera.beta
+            });
+            keysBeta.push({
+                frame: 100,
+                value: toBeta
+            });
+            var animCamRadius = new BABYLON.Animation("animCam", "radius", 30,
+                                    BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+                                    BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
+
+            var keysRadius = [];
+            keysRadius.push({
+                frame: 0,
+                value: camera.radius
+            });
+            keysRadius.push({
+                frame: 100,
+                value: toRadius
+            });
+            animCamAlpha.setKeys(keysAlpha);
+            animCamBeta.setKeys(keysBeta);
+            animCamRadius.setKeys(keysRadius);
+            camera.animations.push(animCamAlpha);
+            camera.animations.push(animCamBeta);
+            camera.animations.push(animCamRadius);
+            scene.beginAnimation(camera, 0, 100, false, 1, function () {
+                });
+
+        }
+    }, function (progress) {
+        // To do: give progress feedback to user
+    });
+
+    function sleep(delay) {
+        var start = new Date().getTime();
+        while (new Date().getTime() < start + delay);
+    }
+</script>
+</html>
